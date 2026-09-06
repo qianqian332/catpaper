@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>选图标 · 猫咪生活报</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#f1e9d4; font-family:"Georgia","Noto Serif SC",serif; color:#5c3a21; padding:20px 16px; }
+  h1 { text-align:center; font-size:20px; margin-bottom:8px; }
+  .sub { text-align:center; font-size:13px; color:#8a6d3b; margin-bottom:24px; }
+  .grid { max-width:480px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  .card { background:#fbf5e4; border:1px solid #dccca4; border-radius:14px; padding:16px; text-align:center; position:relative; }
+  .card img { width:120px; height:120px; border-radius:24px; object-fit:cover; margin-bottom:10px; border:2px solid #dccca4; }
+  .card .num { font-size:11px; font-weight:800; color:#d47826; letter-spacing:.1em; }
+  .card .name { font-size:14px; font-weight:700; margin:4px 0; color:#5c3a21; }
+  .card .desc { font-size:12px; color:#8a6d3b; line-height:1.5; }
+  .card .phone-preview { width:60px; height:60px; border-radius:14px; object-fit:cover; margin:8px auto 0; display:block; border:1px solid #dccca4; }
+  .card .phone-label { font-size:10px; color:#8a6d3b; margin-top:4px; }
+  .footer { text-align:center; margin-top:28px; font-size:12px; color:#8a6d3b; font-style:italic; }
+</style>
+</head>
+<body>
+  <h1>选一个猫咪图标</h1>
+  <p class="sub">选好后告诉我编号（1-4），我帮你换成 App 图标</p>
+  <div class="grid">
+    <div class="card">
+      <img src="assets/icon-1.jpg" alt="icon1" />
+      <div class="num">No.1</div>
+      <div class="name">橘猫戴贝雷帽</div>
+      <div class="desc">圆脸大眼橘猫，头顶棕色贝雷帽，文艺范</div>
+    </div>
+    <div class="card">
+      <img src="assets/icon-2.jpg" alt="icon2" />
+      <div class="num">No.2</div>
+      <div class="name">奶油猫睡报纸</div>
+      <div class="desc">胖嘟嘟奶白色猫卷成团睡在报纸上，配小绿植</div>
+    </div>
+    <div class="card">
+      <img src="assets/icon-3.jpg" alt="icon3" />
+      <div class="num">No.3</div>
+      <div class="name">黑白猫当编辑</div>
+      <div class="desc">燕尾服猫坐在小桌前拿铅笔写字，邮票边框</div>
+    </div>
+    <div class="card">
+      <img src="assets/icon-4.jpg" alt="icon4" />
+      <div class="num">No.4</div>
+      <div class="name">三花猫戴眼镜</div>
+      <div class="desc">闭眼笑三花猫戴圆眼镜，周围飞着报纸和咖啡</div>
+    </div>
+  </div>
+  <p class="footer">猫咪生活报 · 黄油小熊复古报刊编辑部</p>
+</body>
+</html>
