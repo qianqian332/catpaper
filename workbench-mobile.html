@@ -13,8 +13,8 @@
 <meta name="apple-mobile-web-app-title" content="猫咪报" />
 <meta name="theme-color" content="#d47826" />
 <meta name="application-name" content="猫咪生活报" />
-<link rel="apple-touch-icon" href="assets/app-icon.jpg" />
-<link rel="icon" href="assets/app-icon.jpg" />
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+<link rel="icon" href="assets/icon-2-192.png" />
 <style>
   /* ============================================================
      THEME TOKENS — 一处改色，整站换肤（简约·墨色中性默认）
@@ -1247,16 +1247,40 @@ $("#nav").querySelectorAll(".n").forEach(n=>n.onclick=()=>{
   else go(t);
 });
 
-/* ---------- avatar upload ---------- */
+/* ---------- avatar upload（带压缩） ---------- */
 $("#brandCam").innerHTML = icon("camera",18);
 if(data.__avatar) $("#brandImg").src = data.__avatar;
 $("#drawerBrand").onclick = () => $("#avatarInput").click();
 $("#avatarInput").onchange = e => {
   const f = e.target.files && e.target.files[0];
   if(!f) return;
-  const reader = new FileReader();
-  reader.onload = () => { data.__avatar = reader.result; $("#brandImg").src = reader.result; store.save(); };
-  reader.readAsDataURL(f);
+  // 用 canvas 压缩到 200x200，避免 localStorage 溢出
+  const img = new Image();
+  const url = URL.createObjectURL(f);
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 200; canvas.height = 200;
+    const ctx = canvas.getContext("2d");
+    // 居中裁剪
+    const s = Math.min(img.width, img.height);
+    ctx.drawImage(img, (img.width-s)/2, (img.height-s)/2, s, s, 0, 0, 200, 200);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+    URL.revokeObjectURL(url);
+    try {
+      data.__avatar = dataUrl;
+      $("#brandImg").src = dataUrl;
+      store.save();
+    } catch(err) {
+      // 压缩后还是太大，降到 100x100
+      canvas.width = 100; canvas.height = 100;
+      ctx.drawImage(img, (img.width-s)/2, (img.height-s)/2, s, s, 0, 0, 100, 100);
+      data.__avatar = canvas.toDataURL("image/jpeg", 0.6);
+      $("#brandImg").src = data.__avatar;
+      store.save();
+    }
+  };
+  img.onerror = () => URL.revokeObjectURL(url);
+  img.src = url;
   e.target.value = "";
 };
 
