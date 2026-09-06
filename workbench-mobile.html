@@ -1396,7 +1396,19 @@ render();
 
 /* 注册 Service Worker — 离线缓存，添加到主屏幕后可离线使用 */
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js").catch(()=>{});
+  navigator.serviceWorker.register("sw.js").then(reg => {
+    // 检测到新版本 Service Worker，自动刷新
+    reg.addEventListener("updatefound", () => {
+      const nw = reg.installing;
+      if (nw) nw.addEventListener("statechange", () => {
+        if (nw.state === "activated") location.reload();
+      });
+    });
+  }).catch(()=>{});
+  // 页面可见时检查更新
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) navigator.serviceWorker?.getRegistration()?.then(r => r?.update());
+  });
 }
 </script>
 </body>
