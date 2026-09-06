@@ -494,15 +494,39 @@ const CONFIG = {
   slogan: "Cat Daily · 每日发行",
   brand: "喵",                        // 抽屉左上角字符标（品牌缩写）
 
-  // 每日一句（一周七天各一句，按星期轮换：周一→周日）
+  // 每日一句（按日期取模轮换，每天不同；可长按编辑）
   quotes: [
-    "新的一周，像小猫伸懒腰一样醒来，慢慢来。",     // 周一
-    "保持节奏，像猫咪踩着猫步一样稳稳的。",           // 周二
-    "把大目标拆小，今天只追一只蝴蝶就好。",           // 周三
-    "坚持到一半时最难，像猫咪等罐头一样耐心。",       // 周四
-    "收个尾，给这一周一个满意的喵~",                 // 周五
-    "允许自己慢下来，晒晒太阳打个盹也是正经事。",     // 周六
-    "复盘一下，为下一周留点猫薄荷般的方向。",         // 周日
+    "新的一周，像小猫伸懒腰一样醒来，慢慢来。",
+    "保持节奏，像猫咪踩着猫步一样稳稳的。",
+    "把大目标拆小，今天只追一只蝴蝶就好。",
+    "坚持到一半时最难，像猫咪等罐头一样耐心。",
+    "收个尾，给这一周一个满意的喵~",
+    "允许自己慢下来，晒晒太阳打个盹也是正经事。",
+    "复盘一下，为下一周留点猫薄荷般的方向。",
+    "生活就像猫毛球，看着乱，其实每一根都有它的位置。",
+    "今天的目标：比昨天多打一个哈欠。",
+    "猫咪从不赶路，它只是走着走着就到了。",
+    "饿了就吃，困了就睡，向猫学习生活哲学。",
+    "把焦虑揉成纸团，像猫咪拍毛球一样拍飞它。",
+    "午后阳光正好，适合发呆三分钟。",
+    "不是所有事都需要完成，猫咪也经常半路停下来舔毛。",
+    "今天的元气值：一碗猫粮的满格电量。",
+    "生活不需要满分，八分饱的猫最幸福。",
+    "偶尔伸个懒腰，关节咔咔响也是一种活着的声音。",
+    "像猫咪选择纸箱一样，选最简单的那条路。",
+    "今天的风很适合吹动窗帘，然后假装在抓什么。",
+    "深呼吸，翘臀，弓背，然后重新出发。",
+    "猫的世界没有 deadline，只有 nap time。",
+    "有些路要慢慢走，像猫咪巡视领地一样认真。",
+    "把今天过好，明天的罐头自然会来。",
+    "像猫咪一样，不被任何人定义，做自己的样子。",
+    "今天的快乐指标：听到一次猫呼噜声（自己的也算）。",
+    "翻个身继续躺着，这也是一种生活态度。",
+    "猫咪从不高估自己，但它从不低估一条鱼的重量。",
+    "今天要像猫咪一样，优雅地忽略不想做的事。",
+    "月光洒下来的样子，像猫咪的银色背毛。",
+    "每一天都是一张新报纸，写什么由你。",
+    "生活就像逗猫棒，你以为是你在逗它，其实是它在陪你玩。",
   ],
 
   // 今日概览环形（value 为 0-100 的完成度，calc 返回 {value, sub}）
@@ -660,6 +684,19 @@ const store = {
   save(){ localStorage.setItem(CONFIG.storageKey, JSON.stringify(data)); },
 };
 let data = store.load();
+// 恢复用户自定义的账本分类
+if(data.__customCats){
+  CONFIG.modules.forEach(m=>{
+    if(m.type==="finance" && data.__customCats[m.key]){
+      m.categories = m.categories || [];
+      data.__customCats[m.key].forEach(c=>{ if(!m.categories.includes(c)) m.categories.push(c); });
+    }
+  });
+}
+// 恢复用户自定义的今日一句
+if(data.__customQuotes && data.__customQuotes.length){
+  CONFIG.quotes = data.__customQuotes;
+}
 let view = "home";            // home | insight | <moduleKey>
 let pomo = { running:false, remain:25*60, total:25*60 };   // 番茄钟状态（内存态，跨渲染保留）
 let clockTimer = null;                                       // 全局秒级心跳（番茄钟）
@@ -727,8 +764,15 @@ function ringSVG(pct, color){
 /* ---------- HOME ---------- */
 function renderHome(){
   const now = new Date();
-  const dow = (now.getDay()+6)%7;               // 周一=0 … 周日=6
-  const q = CONFIG.quotes[dow % CONFIG.quotes.length];
+  // 按日期取模取句子，每天不同
+  const dayNum = Math.floor(now.getTime()/(1000*60*60*24)); // 天数序号
+  let q;
+  // 如果用户编辑了今天的句子，用编辑的
+  if(data.__todayQuote && data.__todayQuoteDate === isoToday()){
+    q = data.__todayQuote;
+  } else {
+    q = CONFIG.quotes[dayNum % CONFIG.quotes.length];
+  }
   const hour = now.getHours();
   const hi = hour<5?"夜深了":hour<11?"早上好":hour<13?"中午好":hour<18?"下午好":"晚上好";
 
@@ -771,7 +815,7 @@ function renderHome(){
 
   $("#screen").innerHTML = `
     <div class="greet"><div><h1>${hi}</h1><p>欢迎回到${CONFIG.owner}</p></div></div>
-    <div class="quote"><span class="tag">${icon("quote",13)} 今日一句</span><div class="txt">${esc(q)}</div></div>
+    <div class="quote" id="todayQuote" style="cursor:pointer"><span class="tag">${icon("quote",13)} 今日一句 <i style="font-style:normal;font-size:10px;color:var(--text-tertiary);margin-left:4px">点击编辑</i></span><div class="txt">${esc(q)}</div></div>
     <div class="sec-title">今日概览</div>
     <div class="card rings">${rings}</div>
     <div class="sec-title">专注番茄钟</div>
@@ -913,6 +957,33 @@ function wireHome(){
   // 番茄钟控制
   const tg=$("#pomo-toggle"); if(tg) tg.onclick=()=>{ pomo.running=!pomo.running; pomoUpdate(); };
   const rs=$("#pomo-reset"); if(rs) rs.onclick=()=>{ pomo.running=false; pomo.remain=pomo.total; pomoUpdate(); };
+  // 今日一句：点击编辑
+  const qEl=$("#todayQuote"); if(qEl) qEl.onclick=()=>openQuoteEditor();
+}
+
+/* ---------- 今日一句编辑 ---------- */
+function openQuoteEditor(){
+  const current = (data.__todayQuote && data.__todayQuoteDate === isoToday()) ? data.__todayQuote : (CONFIG.quotes[Math.floor(new Date().getTime()/(1000*60*60*24)) % CONFIG.quotes.length]);
+  const overlay=document.createElement("div"); overlay.className="overlay";
+  overlay.innerHTML=`<div class="modal"><div class="grab"></div>
+    <h2>编辑今日一句</h2>
+    <div class="sub">写下今天想对自己说的话</div>
+    <div class="field"><label>今日一句</label><textarea id="q-edit" style="min-height:80px" placeholder="写点什么…">${esc(current)}</textarea></div>
+    <div class="modal-actions"><button class="btn ghost" id="q-reset">恢复默认</button>
+      <button class="btn ghost" id="q-cancel">取消</button><button class="btn" id="q-save">保存</button></div></div>`;
+  document.body.appendChild(overlay);
+  const close=()=>overlay.remove();
+  overlay.onclick=e=>{ if(e.target===overlay) close(); };
+  overlay.querySelector("#q-cancel").onclick=close;
+  overlay.querySelector("#q-reset").onclick=()=>{
+    data.__todayQuote=null; data.__todayQuoteDate=null; store.save();
+    close(); render();
+  };
+  overlay.querySelector("#q-save").onclick=()=>{
+    const v=(overlay.querySelector("#q-edit").value||"").trim();
+    if(v){ data.__todayQuote=v; data.__todayQuoteDate=isoToday(); store.save(); }
+    close(); render();
+  };
 }
 
 /* ---------- INSIGHT ---------- */
@@ -1117,7 +1188,8 @@ function openEditor(key, item){
         <div class="opt ${d.type==='income'?'on':''}" data-v="income">收入</div></div></div>
       <div class="frow"><div class="field"><label>项目</label><input id="f-title" value="${attr(d.title)}" placeholder="午餐 / 稿费"/></div>
       <div class="field"><label>金额 ¥</label><input id="f-amt" type="number" value="${d.amount??''}" placeholder="0"/></div></div>
-      <div class="field"><label>分类</label><div class="seg" style="flex-wrap:wrap" id="f-cat">${(m.categories||[]).map(c=>`<div class="opt ${c===d.category?'on':''}" data-v="${attr(c)}" style="flex:0 0 auto">${esc(c)}</div>`).join("")}</div></div>
+      <div class="field"><label>分类</label><div class="seg" style="flex-wrap:wrap" id="f-cat">${(m.categories||[]).map(c=>`<div class="opt ${c===d.category?'on':''}" data-v="${attr(c)}" style="flex:0 0 auto">${esc(c)}</div>`).join("")}<div class="opt opt-add-cat" style="flex:0 0 auto;color:var(--accent);font-weight:700">+ 添加分类</div></div>
+      <div class="cat-input-wrap" id="f-cat-input" style="display:none;margin-top:6px"><div style="display:flex;gap:6px"><input id="f-cat-new" type="text" placeholder="输入新分类名" style="flex:1"/><button class="btn" id="f-cat-add" style="flex:0 0 auto">添加</button></div></div></div>
       <div class="field"><label>日期</label><input id="f-date" type="date" value="${d.date||isoToday()}"/></div>`;
   } else { // note
     fields=`<div class="field"><label>标题</label><input id="f-title" value="${attr(d.title)}" placeholder="给这条起个名"/></div>
@@ -1155,6 +1227,37 @@ function openEditor(key, item){
   overlay.querySelectorAll(".seg").forEach(seg=>seg.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{
     seg.querySelectorAll(".opt").forEach(x=>x.classList.remove("on")); o.classList.add("on");
   }));
+  // 账本分类：添加自定义分类
+  const addCatBtn = overlay.querySelector(".opt-add-cat");
+  const catInputWrap = overlay.querySelector("#f-cat-input");
+  const catNewInput = overlay.querySelector("#f-cat-new");
+  const catAddBtn = overlay.querySelector("#f-cat-add");
+  const catSeg = overlay.querySelector("#f-cat");
+  if(addCatBtn) addCatBtn.onclick=(e)=>{
+    e.stopPropagation();
+    catInputWrap.style.display = catInputWrap.style.display==="none"?"block":"none";
+    if(catInputWrap.style.display!=="none") catNewInput.focus();
+  };
+  if(catAddBtn) catAddBtn.onclick=()=>{
+    const v=(catNewInput.value||"").trim(); if(!v) return;
+    // 存到模块配置里，持久化
+    if(!m.categories) m.categories=[];
+    if(!m.categories.includes(v)) m.categories.push(v);
+    // 存自定义分类到 data，持久保留
+    if(!data.__customCats) data.__customCats={};
+    if(!data.__customCats[m.key]) data.__customCats[m.key]=[];
+    if(!data.__customCats[m.key].includes(v)) data.__customCats[m.key].push(v);
+    store.save();
+    // 新增选项到 seg，选中新分类
+    const newOpt=document.createElement("div");
+    newOpt.className="opt on"; newOpt.dataset.v=v; newOpt.style.flex="0 0 auto";
+    newOpt.textContent=v;
+    catSeg.querySelectorAll(".opt").forEach(x=>x.classList.remove("on"));
+    catSeg.insertBefore(newOpt, addCatBtn);
+    catNewInput.value="";
+    catInputWrap.style.display="none";
+  };
+  if(catNewInput) catNewInput.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); catAddBtn.click(); } };
   if(editing) overlay.querySelector("#m-del").onclick=()=>{ close(); confirmDelete(key, d.id); };
   overlay.querySelector("#m-save").onclick=()=>{
     const val=id=>{ const el=overlay.querySelector(id); return el?el.value:undefined; };
