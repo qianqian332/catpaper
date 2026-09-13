@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>猫咪生活报 · 部署指南</title>
+<style>
+  :root {
+    --paper: #f1e9d4;
+    --card: #fbf5e4;
+    --ink: #5c3a21;
+    --ink-2: #8a6d3b;
+    --accent: #d47826;
+    --green: #4a6b3a;
+    --border: #dccca4;
+    --border-d: #c9b585;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Georgia", "Noto Serif SC", serif; background: var(--paper); color: var(--ink); line-height: 1.8; padding: 24px 16px; }
+  .wrap { max-width: 680px; margin: 0 auto; }
+  .header { text-align: center; border-bottom: 3px double var(--border-d); padding-bottom: 20px; margin-bottom: 28px; }
+  .header .kicker { font-size: 11px; letter-spacing: .2em; color: var(--ink-2); font-style: italic; text-transform: uppercase; }
+  .header h1 { font-size: 26px; margin-top: 6px; color: var(--ink); }
+  .header .sub { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+  .device-badge { display: inline-block; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; letter-spacing: .08em; margin-bottom: 6px; }
+  .device-badge.pc { background: var(--accent); color: #fff; }
+  .device-badge.phone { background: var(--green); color: #fff; }
+  .step { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 16px; position: relative; }
+  .step::before { content: ""; position: absolute; top: -6px; left: 20px; width: 36px; height: 18px; background: rgba(212,120,38,.3); border: 1px dashed rgba(212,120,38,.4); transform: rotate(-2deg); }
+  .step-num { font-size: 13px; font-weight: 800; color: var(--accent); letter-spacing: .1em; }
+  .step h3 { font-size: 16px; margin: 6px 0 10px; color: var(--ink); }
+  .step p { font-size: 14px; color: var(--ink); margin-bottom: 8px; }
+  .step ol { margin-left: 20px; font-size: 14px; }
+  .step ol li { margin-bottom: 6px; }
+  .step .tip { background: rgba(74,107,58,.1); border-left: 3px solid var(--green); padding: 8px 12px; font-size: 13px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--ink); }
+  .step .warn { background: rgba(212,120,38,.12); border-left: 3px solid var(--accent); padding: 8px 12px; font-size: 13px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--ink); }
+  .code-box { background: var(--ink); color: #f1e9d4; padding: 10px 14px; border-radius: 8px; font-family: monospace; font-size: 13px; word-break: break-all; margin: 8px 0; }
+  .arrow { text-align: center; font-size: 20px; color: var(--ink-2); margin: 8px 0; }
+  .footer { text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--ink-2); font-style: italic; }
+  .phase-title { font-size: 18px; font-weight: 800; color: var(--accent); margin: 24px 0 12px; padding-bottom: 6px; border-bottom: 2px solid var(--border-d); display: flex; align-items: center; gap: 8px; }
+  .phase-title .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+  @media (max-width: 480px) {
+    .step { padding: 16px 14px; }
+    .step::before { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="kicker">DEPLOY GUIDE · 部署指南</div>
+    <h1>猫咪生活报 · 上线全流程</h1>
+    <div class="sub">Netlify Drop 方案 · 零门槛 · 免费永久托管</div>
+  </div>
+
+  <!-- ========== 阶段一 ========== -->
+  <div class="phase-title">
+    <span class="badge" style="background:var(--accent);color:#fff;">电脑</span>
+    阶段一：在电脑上部署上线
+  </div>
+
+  <div class="step">
+    <span class="device-badge pc">电脑操作</span>
+    <div class="step-num">第 1 步</div>
+    <h3>下载部署压缩包到电脑</h3>
+    <p>我已经帮你把所有文件打包好了，文件名叫 <strong>catpaper-deploy.zip</strong>，里面包含：</p>
+    <ol>
+      <li><code>index.html</code> — 入口跳转页</li>
+      <li><code>workbench-mobile.html</code> — 手机版主页面（番茄钟、待办、打卡全在里面）</li>
+      <li><code>workbench-desktop.html</code> — 电脑版（可选）</li>
+      <li><code>manifest.json</code> — PWA 配置（App 名称、图标、主题色）</li>
+      <li><code>sw.js</code> — 离线缓存服务</li>
+      <li><code>assets/</code> — 图片素材（猫咪图标、横幅、头像）</li>
+    </ol>
+    <div class="tip">在对话里点击 <strong>catpaper-deploy.zip</strong> 的链接就能下载到电脑的「下载」文件夹。</div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="step">
+    <span class="device-badge pc">电脑操作</span>
+    <div class="step-num">第 2 步</div>
+    <h3>解压压缩包</h3>
+    <ol>
+      <li>找到下载的 <code>catpaper-deploy.zip</code>（一般在「下载」文件夹）</li>
+      <li><strong>Windows</strong>：右键 → 「解压到 catpaper-deploy\」</li>
+      <li><strong>Mac</strong>：双击 zip 文件，自动解压出一个文件夹</li>
+    </ol>
+    <div class="tip">解压后你会得到一个 <strong>catpaper-deploy</strong> 文件夹，里面有 index.html 和其他所有文件。后面就是把这个文件夹拖到网页上。</div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="step">
+    <span class="device-badge pc">电脑操作</span>
+    <div class="step-num">第 3 步</div>
+    <h3>打开 Netlify Drop 网页</h3>
+    <ol>
+      <li>在电脑浏览器（Chrome / Edge / Safari 都行）地址栏输入：</li>
+    </ol>
+    <div class="code-box">https://app.netlify.com/drop</div>
+    <ol start="2">
+      <li>回车打开页面，你会看到一个大的<strong>虚线框区域</strong>，上面写着 "Drag and drop your site folder here"</li>
+    </ol>
+    <div class="warn">如果你没有 Netlify 账号，可以直接拖拽上传，但网址会临时加密。建议先花 30 秒注册（下面第 4 步），这样网址永久有效。</div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="step">
+    <span class="device-badge pc">电脑操作</span>
+    <div class="step-num">第 4 步（可选但推荐）</div>
+    <h3>注册免费 Netlify 账号</h3>
+    <ol>
+      <li>在 Netlify Drop 页面，点右上角 <strong>"Sign up"</strong></li>
+      <li>选 <strong>"Continue with Email"</strong>，输入邮箱和密码</li>
+      <li>或者直接选 <strong>"Continue with GitHub" / "Continue with Google"</strong>，一键登录</li>
+      <li>去邮箱点确认链接，回到 Netlify 页面就登录好了</li>
+    </ol>
+    <div class="tip">注册完全免费，不需要绑卡。注册后部署的网站永久有效，还能自定义网址。</div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="step">
+    <span class="device-badge pc">电脑操作</span>
+    <div class="step-num">第 5 步</div>
+    <h3>把文件夹拖到虚线框里</h3>
+    <ol>
+      <li>打开电脑上解压好的 <strong>catpaper-deploy</strong> 文件夹</li>
+      <li>用鼠标把<strong>整个文件夹</strong>拖到浏览器里的虚线框区域</li>
+      <li>松手后，页面会显示上传进度条，大约 5-15 秒</li>
+      <li>上传完成后，页面会显示一个绿色成功提示</li>
+    </ol>
+    <div class="warn">拖的是<strong>整个文件夹</strong>，不是单个文件。拖进去后你应该能看到文件夹里所有文件都在上传。</div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="step">
+    <span class="device-badge pc">电脑操作</span>
+    <div class="step-num">第 6 步</div>
+    <h3>复制你的网站地址</h3>
+    <ol>
+      <li>上传成功后，页面上会出现一个绿色链接，格式类似：</li>
+    </ol>
+    <div class="code-box">https://catpaper-xxxxx-xxxx.netlify.app</div>
+    <ol start="2">
+      <li><strong>这就是你的网址了！</strong> 把它复制下来</li>
+      <li>可以先在电脑浏览器里打开试一下，能看到猫咪生活报首页就说明部署成功</li>
+    </ol>
+    <div class="tip">如果想改成好记的网址（比如 catpaper.netlify.app），在 Netlify 后台 → Site settings → Domain settings → Change site name 里改。</div>
+  </div>
+
+  <div class="arrow" style="font-size: 28px;">↓</div>
+
+  <!-- ========== 阶段二 ========== -->
+  <div class="phase-title">
+    <span class="badge" style="background:var(--green);color:#fff;">手机</span>
+    阶段二：在手机上添加到桌面
+  </div>
+
+  <div class="step">
+    <span class="device-badge phone">手机操作</span>
+    <div class="step-num">第 7 步</div>
+    <h3>把网址发到手机上</h3>
+    <p>选任意一种方式把网址传到手机：</p>
+    <ol>
+      <li><strong>微信/QQ</strong>：电脑上把网址发到自己的"文件传输助手"，手机上复制</li>
+      <li><strong>扫码</strong>：用电脑打开网址 → 生成二维码（浏览器搜索"网址转二维码"）→ 手机扫码</li>
+      <li><strong>手动输入</strong>：网址不复杂的话直接在手机浏览器里打出来</li>
+    </ol>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="step">
+    <span class="device-badge phone">手机操作 · iPhone</span>
+    <div class="step-num">第 8 步-A</div>
+    <h3>iPhone：用 Safari 添加到主屏幕</h3>
+    <ol>
+      <li>打开 <strong>Safari 浏览器</strong>（必须用 Safari，Chrome 不行）</li>
+      <li>地址栏粘贴你的网址，打开页面</li>
+      <li>点底部工具栏的 <strong>分享按钮</strong>（一个方框加向上箭头的图标 📤）</li>
+      <li>在弹出的菜单中向下滑动，找到 <strong>"添加到主屏幕"</strong>，点它</li>
+      <li>会弹出预览界面，名字默认是"猫咪报"，点右上角 <strong>"添加"</strong></li>
+    </ol>
+    <div class="tip">如果没看到"添加到主屏幕"选项：滑到列表最底部 → 点"编辑操作" → 打开"添加到主屏幕"的开关。</div>
+    <div class="warn">必须用 Safari，不是 Chrome。Chrome 添加的只是快捷方式，Safari 添加的才是真正的全屏 App 体验。</div>
+  </div>
+
+  <div class="step">
+    <span class="device-badge phone">手机操作 · Android</span>
+    <div class="step-num">第 8 步-B</div>
+    <h3>Android：用 Chrome 添加到主屏幕</h3>
+    <ol>
+      <li>打开 <strong>Chrome 浏览器</strong></li>
+      <li>地址栏粘贴你的网址，打开页面</li>
+      <li>点右上角 <strong>三个点 ⋮</strong></li>
+      <li>找到 <strong>"添加到主屏幕"</strong> 或 <strong>"安装应用"</strong>，点它</li>
+      <li>弹出确认框，点 <strong>"添加"</strong></li>
+    </ol>
+    <div class="tip">有些 Android 手机打开 PWA 网页时，底部会自动弹出一个横幅提示"添加到主屏幕"，直接点就行，不用进菜单。</div>
+  </div>
+
+  <div class="arrow">↓</div>
+
+  <div class="step">
+    <span class="device-badge phone">手机操作</span>
+    <div class="step-num">第 9 步</div>
+    <h3>从桌面图标打开 · 完成！</h3>
+    <ol>
+      <li>回到手机桌面，你会看到一个<strong>猫咪图标</strong>，名字叫"猫咪报"</li>
+      <li>点开 → 全屏打开，没有浏览器地址栏，就像一个真正的 App</li>
+      <li>首页有番茄钟、今日概览、置顶任务、快速记录、趋势图</li>
+      <li>即使断网也能打开（Service Worker 已缓存离线版本）</li>
+    </ol>
+    <div class="tip">番茄钟点"开始"就会实时倒计时，每秒更新。数据存在手机本地，换手机或清浏览器记录会丢失。</div>
+  </div>
+
+  <!-- ========== 补充说明 ========== -->
+  <div class="phase-title">
+    <span class="badge" style="background:var(--ink);color:#f1e9d4;">补充</span>
+    常见问题
+  </div>
+
+  <div class="step">
+    <h3>Q：打开网址是空白页？</h3>
+    <p>检查拖上去的文件夹结构是否正确。index.html 应该在最外层，不是嵌套在子文件夹里。如果 Netlify 只显示文件列表而不是页面，说明 index.html 没被识别到。</p>
+    <h3 style="margin-top:14px;">Q：图标没显示猫咪？</h3>
+    <p>PWA 图标第一次加载需要联网。打开网址后等 Service Worker 缓存完成（第一次访问后），再次"添加到主屏幕"图标就正常了。</p>
+    <h3 style="margin-top:14px;">Q：以后想改内容怎么办？</h3>
+    <p>在 Netlify 后台找到你的项目 → Production deploys 区域 → 把更新后的文件夹重新拖上去，会自动覆盖发布新版。手机上关掉再重开就是最新版。</p>
+    <h3 style="margin-top:14px;">Q：网址会被别人看到吗？</h3>
+    <p>网址是随机的，不主动分享别人搜不到。如果注册了账号，可以在 Settings 里开启密码保护。</p>
+  </div>
+
+  <div class="footer">
+    猫咪生活报 · 黄油小熊复古报刊编辑部 · 2026
+  </div>
+
+</div>
+</body>
+</html>
